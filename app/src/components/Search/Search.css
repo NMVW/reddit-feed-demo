@@ -1,0 +1,42 @@
+.SearchBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#autocomplete-search-options {
+  width: 300px;
+  margin: 0;
+}
+
+.MuiFormLabel-root.Mui-focused {
+  color: #48a4c1 !important;
+}
+
+.MuiInputBase-root {
+  background: floralwhite;
+  border-radius: 0 !important;
+}
+
+.MuiInputBase-root fieldset {
+  border: none;
+}
+
+.InputBar {
+  height: 100%;
+}
+
+button.Disabled {
+  background: lightgrey !important;
+  color: darkgrey !important;
+}
+
+.SubRedditSearchIcon {
+  background: rgb(218, 218, 218);
+  font-weight: bold;
+  font-size: large;
+  padding: .6rem;
+  padding-top: 1rem;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}

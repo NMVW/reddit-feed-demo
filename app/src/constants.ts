@@ -1,0 +1,2 @@
+export const SUBREDDIT_FOLLOW_LIMIT = 5;
+export const SUBREDDIT_SEARCH_TEXT_PLACEHOLDER = 'Search...';
