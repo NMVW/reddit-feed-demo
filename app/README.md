@@ -17,7 +17,7 @@ A very lightweight Reddit feed using their JSON API (add .json to a Reddit URL).
 - A maximum of 5 subreddits can be followed at any given time. The oldest followed subreddit is removed as count goes above 5.
 - Please try to match the provided mock up as close as possible.
 
-![ui mock up](https://github.com/NMVW/reddit-feed-demo/blob/master/ui_mock.png)
+![ui mock up](https://github.com/NMVW/reddit-feed-demo/blob/master/app/ui_mock.png)
 
 ------
 
