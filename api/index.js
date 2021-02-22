@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 const port = 3333;
-const { REDDIT_API_URL, APP_DOMAIN } = require('./.env.json');
+const { REDDIT_API_DOMAIN, APP_DOMAIN } = require('./.env.json');
 
 const { searchSubs } = require('./search');
 const { loadTopPost } = require('./load');
@@ -30,14 +30,14 @@ app.get('/', (req, res) => {
 });
 
 app.post('/search_subreddits', async (req, res) => {
-  const redditEndpoint = `${REDDIT_API_URL}/search_subreddits.json?query=${req.query.searchText}`;
+  const redditEndpoint = `${REDDIT_API_DOMAIN}/api/search_subreddits.json?query=${req.query.searchText}`;
   const subRedditNames = await searchSubs(redditEndpoint);
   res.send(subRedditNames);
 });
 
 app.get('/load_subreddit_top_post', async (req, res) => {
   // fetch top post for subreddit
-  const redditEndpoint = `${REDDIT_API_URL.replace('/api', '/r')}/${req.query.r}/top.json?limit=1`;
+  const redditEndpoint = `${REDDIT_API_DOMAIN}/r/${req.query.r}/top.json?limit=1`;
   const top_post = await loadTopPost(redditEndpoint);
   res.send({ top_post });
 });

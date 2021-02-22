@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const { REDDIT_API_DOMAIN } = require('./.env.json');
 
 async function loadTopPost(resource) {
 
@@ -14,7 +15,7 @@ async function loadTopPost(resource) {
     title,
     score,
     created_utc: created_at_unix, // utc timestamp
-    url: link_url,
+    permalink: link_url,
     author: author_username,
     thumbnail: thumbnail_url,
   } = topPost;
@@ -24,7 +25,7 @@ async function loadTopPost(resource) {
     title,
     score,
     created_at: new Date(created_at_unix * 1000),
-    link_url,
+    link_url: `${REDDIT_API_DOMAIN}${link_url}`,
     author_username,
     thumbnail_url,
     _last_fetched: new Date(),
