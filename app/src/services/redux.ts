@@ -28,7 +28,7 @@ interface Action {
 const sortByFollowedAt = (subs: Array<SubReddit>) => subs.sort((subA: SubReddit, subB: SubReddit) => (new Date(subB.followedAt) as unknown as number) - (new Date(subA.followedAt) as unknown as number));
 const sortByScore = (subs: Array<SubReddit>) => subs.sort((subA: SubReddit, subB: SubReddit) => {
   if (subA.topPost && subB.topPost) {
-    return subA.topPost.score - subB.topPost.score;
+    return subB.topPost.score - subA.topPost.score;
   }
   return 0;
 });
@@ -91,14 +91,14 @@ const feedSlice = createSlice({
         // pop off oldest followed reddit
         const nextList = sortByFollowedAt(list.concat(subReddit));
         nextList.pop();
-        persistFeed(nextList);
+        persistFeed(sortByScore(nextList));
         return  {
           ...state,
           list: nextList,
         };
       }
 
-      const nextList = state.list.concat(subReddit as any);
+      const nextList = sortByScore(state.list.concat(subReddit as any));
       persistFeed(nextList);
       return { status: state.status, list: nextList };
     },
