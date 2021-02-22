@@ -1,0 +1,13 @@
+{
+  "name": "reddit-api",
+  "version": "1.0.0",
+  "description": "windfall demo reddit api server",
+  "main": "index.js",
+  "author": "Nick Vinson",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1"
+  }
+}
