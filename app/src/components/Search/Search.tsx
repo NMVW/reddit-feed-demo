@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import './Search.css';
 
-import { useNode } from '../../services/domNode';
-import { SUBREDDIT_SEARCH_TEXT_PLACEHOLDER } from '../../constants';
 import Autocomplete from './Autocomplete';
+import { useDispatch, useSelector } from 'react-redux';
+import { SubReddit, AppState } from '../../interfaces';
+import { fetchSubreddit } from '../../services/redux';
 
 const btnStyles = {
   color: 'white',
@@ -16,12 +17,23 @@ const btnStyles = {
   padding: '.7rem',
 };
 
-export default function Search () {
+export default function Search (props: { notify: (message: string) => void }) {
 
+  const dispatch = useDispatch();
   const [ selectedOption, selectOption ] = useState('');
+  const subredditsFollowed: string[] = useSelector((state: AppState) => state.feed.list.map((sub: SubReddit) => sub.name));
+  
+  const addSubreddit = (name: string) => dispatch(fetchSubreddit({ name }));
 
   const subscribe = () => {
-    alert(selectedOption); // make async call to get full subreddit and add it to list in redux
+    const alreadyFollowed = subredditsFollowed.includes(selectedOption);
+    if (alreadyFollowed) {
+      props.notify(`Already following r/${selectedOption}`);
+    } else {
+      // will dispatch async call and add to feed
+      props.notify(`Subscribed to r/${selectedOption}.`);
+      addSubreddit(selectedOption);
+    }
     selectOption('');
   };
 

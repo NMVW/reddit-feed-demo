@@ -1,10 +1,11 @@
 const express = require('express');
-const fetch = require('node-fetch');
 const app = express();
-const port = 3333;
-const { searchSubs } = require('./search');
 
+const port = 3333;
 const { REDDIT_API_URL, APP_DOMAIN } = require('./.env.json');
+
+const { searchSubs } = require('./search');
+const { loadTopPost } = require('./load');
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', APP_DOMAIN);
@@ -13,7 +14,19 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('hello api reddit');
+  res.send({
+    reddit_apis: [{
+      method: 'POST',
+      endpoint: '/search_subreddits',
+      params: 'searchText',
+      returns: ['subreddit_names'],
+    }, {
+      method: 'GET',
+      endpoint: '/load_subreddit_top_post',
+      params: 'r',
+      returns: 'top_post',
+    }]
+  });
 });
 
 app.post('/search_subreddits', async (req, res) => {
@@ -22,6 +35,13 @@ app.post('/search_subreddits', async (req, res) => {
   res.send(subRedditNames);
 });
 
+app.get('/load_subreddit_top_post', async (req, res) => {
+  // fetch top post for subreddit
+  const redditEndpoint = `${REDDIT_API_URL.replace('/api', '/r')}/${req.query.r}/top.json?limit=1`;
+  const top_post = await loadTopPost(redditEndpoint);
+  res.send({ top_post });
+});
+
 app.listen(port, () => {
-  console.log('listening on ', port);
+  console.log('API Server listening on ', port);
 });

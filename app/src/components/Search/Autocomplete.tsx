@@ -1,40 +1,29 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import React, { useState, useEffect } from 'react';
 
+import { SUBREDDIT_SEARCH_TEXT_PLACEHOLDER } from '../../constants';
 import { fetchSubredditNameOptions, SubRedditNamesResponse, debounce } from '../../services/api';
 
 import TextField from '@material-ui/core/TextField';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      backgroundColor: theme.palette.background.paper,
-    },
-  }),
-);
-
-const options = [
-  'Show some love to Material-UI',
-  'Show all notification content',
-  'Hide sensitive notification content',
-  'Hide all notification content',
-];
 
 interface AutocompleteProps {
   selectedOption: string
   selectOption: (option: string) => void
 }
 
-const fetchOptions = debounce(async (searchText: string, callback: (res: string[]) => void) => {
+const fetchOptions = debounce(async (searchText: string, setLocalOptions: (res: string[]) => void, setOfflineStatus: (isOffline: boolean) => void, load: any) => {
   const response: SubRedditNamesResponse = await fetchSubredditNameOptions(searchText);
-  debugger;
   if (response.status === 'online') {
-    debugger;
-    callback(response.subRedditNames);
+    setLocalOptions(response.subRedditNames);
+    setOfflineStatus(false);
+    return;
+  } else {
+    setOfflineStatus(true);    
   }
+  load(false);
 }) as any;
 
 /* eslint-disable no-use-before-define */
@@ -42,26 +31,14 @@ export default function SearchOptions(props: AutocompleteProps) {
   const [ searchText, setText ] = useState('');
   const [ options, setOptions ] = useState<string[] | []>([]);
   const [ isOffline, setOffline ] = useState(false);
-  console.log('render', options.length);
-  const search = useCallback(async () => {
+  const [ isLoading, setLoading ] = useState(false);
+  
+  useEffect(() => {
     if (!isOffline && searchText) {
-      fetchOptions(searchText, setOptions);
-
-      // if (!response) {
-      //   return;
-      // }
-      // debugger;
-      // if (response.status === 'online') {
-      //   setOptions(response.subRedditNames);
-      //   return;
-      // }
-      // setOffline(true);
+      setLoading(true);
+      fetchOptions(searchText, setOptions, setOffline, setLoading);
     }
   }, [searchText, isOffline]);
-
-  useEffect(() => {
-    search();
-  }, [searchText]);
 
   return (
     <Autocomplete
@@ -71,16 +48,21 @@ export default function SearchOptions(props: AutocompleteProps) {
         props.selectOption(newOption || '');
       }}
       options={options}
-      getOptionLabel={(option: any) => option}
+      getOptionLabel={(option: string) => option}
       renderInput={(params: any) => (
-        <TextField {...params} label={isOffline ? 'Offline': 'Search...'} variant="outlined" margin="none" />
+        <TextField
+          {...params}
+          label={isOffline ? 'Offline': SUBREDDIT_SEARCH_TEXT_PLACEHOLDER}
+          variant="outlined"
+          margin="none"
+        />
       )}
-      loading={true}
+      loading={isLoading}
       inputValue={searchText}
       onInputChange={(ev: any, newInputValue) => setText(newInputValue)}
-      renderOption={(option: any, { inputValue }: { inputValue: any }) => {
-        const matches = match(option.name, inputValue);
-        const parts = parse(option.name, matches);
+      renderOption={(option: string, { inputValue }: { inputValue: string }) => {
+        const matches = match(option, inputValue);
+        const parts = parse(option, matches);
 
         return (
           <div>

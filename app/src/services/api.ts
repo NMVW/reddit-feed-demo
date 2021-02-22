@@ -1,14 +1,14 @@
-import { SubReddit } from '../interfaces';
+import { SubReddit, RedditPost } from '../interfaces';
+import Axios from 'axios';
 
-const feed_api_url = process.env.REACT_APP_FEED_API_URL as string;
-const search_api_url = process.env.REACT_APP_SEARCH_API_URL as string;
+const api_domain = process.env.REACT_APP_API_DOMAIN as string;
 
 interface ApiResponse {
   status: 'online' | 'offline' | 'error'
 }
 
 interface SubRedditResponse extends ApiResponse {
-  subReddit: SubReddit | null
+  topSubRedditPost: RedditPost | null
 }
 
 export interface SubRedditNamesResponse extends ApiResponse {
@@ -35,20 +35,13 @@ export function debounce(fn: (...params: any[]) => any, waitTime = 1000) {
   }
 }
 
+const axios = Axios.create({ baseURL: api_domain });
+
 // wrapper for timing out outbound fetch requests
-async function fetchWithTimeout(resource: string, options: { timeout: number, method?: string, headers?: any }) {
+async function fetchWithTimeout(resource: string, options: { timeout: number, method: string }) {
   const { timeout = 8000 } = options;
 
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  const response = await fetch(resource, {
-    ...options,
-    mode: 'no-cors',
-    signal: controller.signal,
-  });
-
-  clearTimeout(id);
+  const response = await axios.request({ method: options.method as any, url: resource });
 
   return response;
 }
@@ -56,23 +49,22 @@ async function fetchWithTimeout(resource: string, options: { timeout: number, me
 export async function fetchSubredditTopPost(name: string): Promise<SubRedditResponse> {
 
   try {
-    const response = await fetchWithTimeout(`${feed_api_url}/sub-reddit?name=${name}`, { timeout: 8000 });
-    const data = await response.json();
+    const response = await fetchWithTimeout(`${api_domain}/load_subreddit_top_post?r=${name}`, { method: 'GET', timeout: 8000 });
     return {
       status: 'online',
-      subReddit: data.subReddit,
+      topSubRedditPost: response.data.top_post,
     };
   } catch (error) {
     if (error.name === 'AbortError') {
       // request timed out
       return {
         status: 'offline',
-        subReddit: null,
+        topSubRedditPost: null,
       };
     } else {
       return {
         status: 'error',
-        subReddit: null,
+        topSubRedditPost: null,
       };
     }
   }
@@ -80,13 +72,10 @@ export async function fetchSubredditTopPost(name: string): Promise<SubRedditResp
 
 export async function fetchSubredditNameOptions(searchText: string): Promise<SubRedditNamesResponse> {
   try {
-    const response = await fetchWithTimeout(`${search_api_url}?query=${searchText}`, { timeout: 3000, method: 'POST', headers: { 'Accept-Encoding': 'application/json'} });
-    debugger;
-    const data = await response.json();
-    const subRedditNames = data.subreddits.map((sub: any) => sub.name);
+    const response = await fetchWithTimeout(`${api_domain}/search_subreddits?searchText=${searchText}`, { timeout: 3000, method: 'POST' });
     return {
       status: 'online',
-      subRedditNames: subRedditNames,
+      subRedditNames: response.data as string[],
     };
   } catch (error) {
     if (error.name === 'AbortError') {
