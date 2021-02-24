@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "Nick Vinson",
   "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "axios": "^0.21.1",
     "express": "^4.17.1",
